@@ -28,6 +28,7 @@
             border-radius: 0.5rem; /* rounded-lg */
             transition: all 0.2s ease-in-out; /* transition-all duration-200 */
             cursor: pointer;
+            width: 100%; /* Make buttons take full width when stacked */
         }
         /* Default inactive state */
         .admin-nav-button:not(.active) {
@@ -155,38 +156,41 @@
     </style>
 </head>
 <body class="antialiased">
-    <div id="app-container" class="bg-white rounded-xl shadow-lg p-6 w-full max-w-md mx-auto transform transition-all duration-300">
+    <div id="app-container" class="bg-white rounded-xl shadow-lg p-6 w-full max-w-4xl mx-auto transform transition-all duration-300">
         <!-- Login Screen -->
         <div id="login-screen" class="space-y-6">
             <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">Ferienprogramm</h1>
             <p class="text-center text-gray-600 mb-8">Bitte gib den Zugangscode ein.</p>
 
-            <!-- Code Display -->
-            <div class="bg-gray-100 border border-gray-300 rounded-lg p-4 text-center text-3xl font-semibold tracking-wider text-gray-800 mb-6 shadow-inner">
-                <span id="code-display"></span><span id="cursor" class="animate-pulse">|</span>
-            </div>
+            <!-- Inner container for login screen content to keep it compact -->
+            <div class="max-w-md mx-auto">
+                <!-- Code Display -->
+                <div class="bg-gray-100 border border-gray-300 rounded-lg p-4 text-center text-3xl font-semibold tracking-wider text-gray-800 mb-6 shadow-inner">
+                    <span id="code-display"></span><span id="cursor" class="animate-pulse">|</span>
+                </div>
 
-            <!-- Keypad -->
-            <div class="grid grid-cols-3 gap-4">
-                <!-- Numbers -->
-                <button class="keypad-button" data-value="1">1</button>
-                <button class="keypad-button" data-value="2">2</button>
-                <button class="keypad-button" data-value="3">3</button>
-                <button class="keypad-button" data-value="4">4</button>
-                <button class="keypad-button" data-value="5">5</button>
-                <button class="keypad-button" data-value="6">6</button>
-                <button class="keypad-button" data-value="7">7</button>
-                <button class="keypad-button" data-value="8">8</button>
-                <button class="keypad-button" data-value="9">9</button>
-                <!-- Backspace and 0 -->
-                <button class="keypad-button bg-red-500 hover:bg-red-600 active:bg-red-700 text-white" data-action="clear">⌫</button>
-                <button class="keypad-button" data-value="0">0</button>
-                <button class="keypad-button bg-green-500 hover:bg-green-600 active:bg-green-700 text-white" data-action="enter">✓</button>
-            </div>
+                <!-- Keypad -->
+                <div class="grid grid-cols-3 gap-4">
+                    <!-- Numbers -->
+                    <button class="keypad-button" data-value="1">1</button>
+                    <button class="keypad-button" data-value="2">2</button>
+                    <button class="keypad-button" data-value="3">3</button>
+                    <button class="keypad-button" data-value="4">4</button>
+                    <button class="keypad-button" data-value="5">5</button>
+                    <button class="keypad-button" data-value="6">6</button>
+                    <button class="keypad-button" data-value="7">7</button>
+                    <button class="keypad-button" data-value="8">8</button>
+                    <button class="keypad-button" data-value="9">9</button>
+                    <!-- Backspace and 0 -->
+                    <button class="keypad-button bg-red-500 hover:bg-red-600 active:bg-red-700 text-white" data-action="clear">⌫</button>
+                    <button class="keypad-button" data-value="0">0</button>
+                    <button class="keypad-button bg-green-500 hover:bg-green-600 active:bg-green-700 text-white" data-action="enter">✓</button>
+                </div>
 
-            <!-- Message Box for errors -->
-            <div id="message-box" class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg hidden text-center" role="alert">
-                <!-- Error message will be inserted here -->
+                <!-- Message Box for errors -->
+                <div id="message-box" class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg hidden text-center" role="alert">
+                    <!-- Error message will be inserted here -->
+                </div>
             </div>
         </div>
 
@@ -218,15 +222,17 @@
             </p>
 
             <!-- Admin Navigation/Menu Band -->
-            <div class="flex justify-center space-x-4 mb-6">
-                <button id="nav-user-management" class="admin-nav-button active">Benutzerverwaltung</button>
+            <div class="flex flex-col space-y-2 mb-6"> <!-- Changed to flex-col for vertical stacking -->
+                <button id="nav-user-management" class="admin-nav-button">Benutzerverwaltung</button> <!-- Removed active class -->
                 <button id="nav-participant-management" class="admin-nav-button">Teilnehmerverwaltung</button>
-                <button id="nav-participant-overview" class="admin-nav-button">Teilnehmerübersicht</button> <!-- NEW NAV BUTTON -->
+                <button id="nav-participant-overview" class="admin-nav-button">Teilnehmerübersicht</button>
                 <button id="nav-program-settings" class="admin-nav-button">Programmeinstellungen</button>
             </div>
 
             <!-- Section Containers -->
-            <div id="admin-section-wrapper"> <!-- Wrapper to contain all admin sub-sections -->
+            <div id="admin-section-wrapper" class="hidden"> <!-- Initially hidden -->
+                <p id="admin-welcome-message" class="text-center text-gray-600 mb-4">Bitte wählen Sie eine der Optionen oben.</p> <!-- New message -->
+
                 <div id="user-management-section" class="bg-gray-100 rounded-lg p-4 shadow-md hidden">
                     <h3 class="text-xl font-semibold text-gray-700 mb-4">Benutzerverwaltung</h3>
 
@@ -307,13 +313,13 @@
 
                     <div class="space-y-3 mt-6 border-t pt-4">
                         <h4 class="text-lg font-medium text-gray-700 mb-3">Datenverwaltung</h4>
-                        <button id="remove-all-participants-button" class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200">
+                        <button id="remove-all-participants-button" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200">
                             Alle Teilnehmer entfernen
                         </button>
-                        <button id="remove-daily-participants-button" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200">
+                        <button id="remove-daily-participants-button" class="w-full bg-gray-400 hover:bg-gray-500 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200">
                             Alle Tagesanmeldungen entfernen
                         </button>
-                        <button id="reset-all-participants-button" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200">
+                        <button id="reset-all-participants-button" class="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition-all duration-200">
                             Status und Daten zurücksetzen
                         </button>
                     </div>
@@ -343,7 +349,7 @@
                 <p id="delete-modal-message" class="mb-6">Bist du sicher, dass du <span id="delete-item-display" class="font-semibold"></span> löschen möchtest?</p>
                 <div class="flex justify-end space-x-3">
                     <button id="cancel-delete" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg">Abbrechen</button>
-                    <button id="confirm-delete" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg">Löschen</button>
+                    <button id="confirm-delete" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg">Bestätigen</button> <!-- Changed to blue -->
                 </div>
             </div>
         </div>
@@ -586,6 +592,8 @@
             const userManagementSection = document.getElementById('user-management-section');
             const programSettingsSection = document.getElementById('program-settings-section');
             const adminNavButtons = document.querySelectorAll('.admin-nav-button');
+            const adminSectionWrapper = document.getElementById('admin-section-wrapper'); // NEW
+            const adminWelcomeMessage = document.getElementById('admin-welcome-message'); // NEW
 
             // Geänderte Variablen von 'let' zu 'var', um "SyntaxError: Cannot declare a let variable twice" zu vermeiden
             var enteredCode = '';
@@ -783,6 +791,7 @@
                 participantManagementSection.classList.add('hidden');
                 adminParticipantOverviewSection.classList.add('hidden'); // NEW: Hide overview section
                 programSettingsSection.classList.add('hidden');
+                adminWelcomeMessage.classList.add('hidden'); // Hide welcome message when a section is active
 
                 // Deactivate all navigation buttons
                 adminNavButtons.forEach(button => {
@@ -791,6 +800,8 @@
 
                 // Control visibility of the shared participant list container
                 unifiedParticipantContainer.classList.add('hidden');
+                adminSectionWrapper.classList.remove('hidden'); // Show the wrapper when a section is selected
+
 
                 // Show the selected section and activate its button
                 if (sectionId === 'user-management-section') {
@@ -807,6 +818,10 @@
                 } else if (sectionId === 'program-settings-section') {
                     programSettingsSection.classList.remove('hidden');
                     navProgramSettingsButton.classList.add('active');
+                } else {
+                    // Default state: no section open, show welcome message
+                    adminSectionWrapper.classList.add('hidden'); // Hide the wrapper
+                    adminWelcomeMessage.classList.remove('hidden'); // Show welcome message
                 }
             }
 
@@ -837,8 +852,8 @@
                             if (foundUser.status === 'admin') {
                                 mainContentScreen.classList.add('hidden');
                                 adminContentScreen.classList.remove('hidden');
-                                // Default to showing user management on admin login, hide participant list
-                                showAdminSection('user-management-section');
+                                // Initially, no section is open for admin
+                                showAdminSection(''); // Call with empty string to show welcome message
                                 unifiedParticipantContainer.classList.add('hidden'); // Hide the unified list initially
                                 window.showMessage(`Willkommen, Admin ${foundUser.username}!`, false);
                             } else if (foundUser.status === 'Betreuer') {
@@ -911,7 +926,7 @@
                             <button data-id="${userData.id}" data-status="${userData.status}" class="change-user-status-button text-blue-500 hover:text-blue-700 text-sm font-medium">
                                 Status ändern (${userData.status === 'admin' ? 'Betreuer' : 'Admin'})
                             </button>
-                            <button data-id="${userData.id}" data-username="${userData.username}" data-type="user" class="delete-item-button text-red-500 hover:text-red-700 text-sm font-medium">
+                            <button data-id="${userData.id}" data-username="${userData.username}" data-type="user" class="delete-item-button text-blue-500 hover:text-blue-700 text-sm font-medium"> <!-- Changed to blue -->
                                 Entfernen
                             </button>
                         </div>
@@ -1220,7 +1235,7 @@
                         } else {
                             noCommentsMessage.classList.remove('hidden');
                         }
-                        newCommentText.value = ''; // Clear comment input field
+                        newCommentText.value = ''; // Clear input field
 
                         participantDetailsModal.classList.remove('hidden');
                     }
@@ -1364,18 +1379,15 @@
                 deleteModal.classList.remove('hidden');
                 confirmDeleteButton.textContent = 'Bestätigen'; // Default text for confirmation
                 confirmDeleteButton.classList.remove('bg-red-500', 'bg-orange-500', 'bg-yellow-500'); // Reset colors
-                confirmDeleteButton.classList.add('bg-red-500'); // Default to red for destructive
+                confirmDeleteButton.classList.add('bg-blue-500'); // Changed to blue
 
-                // Set button text/color based on action type for clarity
+                // Set button text/color based on action type for clarity (now only text changes)
                 if (title.includes('Löschen')) {
                     confirmDeleteButton.textContent = 'Löschen';
-                    confirmDeleteButton.classList.add('bg-red-500');
                 } else if (title.includes('Entfernen')) {
                     confirmDeleteButton.textContent = 'Entfernen';
-                    confirmDeleteButton.classList.add('bg-orange-500');
                 } else if (title.includes('Zurücksetzen')) {
                     confirmDeleteButton.textContent = 'Zurücksetzen';
-                    confirmDeleteButton.classList.add('bg-yellow-500');
                 }
 
                 currentConfirmAction = confirmCallback;
@@ -1458,6 +1470,7 @@
                 currentLoggedInUsername = ''; // Clear username on logout
                 currentLoggedInUserStatus = ''; // Clear user status on logout
                 unifiedParticipantContainer.classList.add('hidden'); // Hide the unified list
+                showAdminSection(''); // Ensure no section is open on next admin login
                 window.showMessage('Erfolgreich abgemeldet.', false);
             });
 
