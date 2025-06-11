@@ -198,7 +198,7 @@
         <div id="main-content-screen" class="space-y-6 hidden">
             <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Ferienprogramm An-/Abmeldung (Betreuer)</h2>
             <p class="text-center text-gray-600 mb-8">
-                Willkommen, Betreuer! Wische auf einem Teilnehmer nach links, um den An-/Abmelde-Button zu enthüllen. Klicke dann auf den Button. Die Änderungen werden automatisch gespeichert.
+                Willkommen, <span id="betreuer-name-display"></span>! Wische auf einem Teilnehmer nach links, um den An-/Abmelde-Button zu enthüllen. Klicke auf den Button, um Teilnehmer an oder abzumelden. Unter dem Infobutton kannst du Details einsehen und Kommentare erstellen. Sobald ein Kommentar bei einem Teilnehmer hinterlegt ist, findet sich ein (C) vor dem Infobutton. **Die Änderungen werden automatisch gespeichert.**
             </p>
 
             <!-- Action feedback message from top -->
@@ -483,6 +483,7 @@
             const logoutButtonMain = document.getElementById('logout-button-main');
             const logoutButtonAdmin = document.getElementById('logout-button-admin');
             const messageBox = document.getElementById('message-box');
+            const betreuerNameDisplay = document.getElementById('betreuer-name-display'); // New element for Betreuer name
 
             // Admin User Management Elements
             const newUsernameInput = document.getElementById('new-username');
@@ -800,26 +801,27 @@
 
                 // Control visibility of the shared participant list container
                 unifiedParticipantContainer.classList.add('hidden');
-                adminSectionWrapper.classList.remove('hidden'); // Show the wrapper when a section is selected
-
-
-                // Show the selected section and activate its button
-                if (sectionId === 'user-management-section') {
-                    userManagementSection.classList.remove('hidden');
-                    navUserManagementButton.classList.add('active');
-                } else if (sectionId === 'participant-management-section') {
-                    participantManagementSection.classList.remove('hidden');
-                    navParticipantManagementButton.classList.add('active');
-                } else if (sectionId === 'admin-participant-overview-section') { // NEW: Participant Overview
-                    adminParticipantOverviewSection.classList.remove('hidden');
-                    navParticipantOverviewButton.classList.add('active');
-                    unifiedParticipantContainer.classList.remove('hidden'); // Show the unified list
-                    renderParticipantList(); // Render to the unified list
-                } else if (sectionId === 'program-settings-section') {
-                    programSettingsSection.classList.remove('hidden');
-                    navProgramSettingsButton.classList.add('active');
-                } else {
-                    // Default state: no section open, show welcome message
+                
+                // Show the admin section wrapper if a specific section is chosen, otherwise hide it and show welcome message
+                if (sectionId) { // If sectionId is not empty
+                    adminSectionWrapper.classList.remove('hidden'); // Show the wrapper
+                    // Show the selected section and activate its button
+                    if (sectionId === 'user-management-section') {
+                        userManagementSection.classList.remove('hidden');
+                        navUserManagementButton.classList.add('active');
+                    } else if (sectionId === 'participant-management-section') {
+                        participantManagementSection.classList.remove('hidden');
+                        navParticipantManagementButton.classList.add('active');
+                    } else if (sectionId === 'admin-participant-overview-section') { // NEW: Participant Overview
+                        adminParticipantOverviewSection.classList.remove('hidden');
+                        navParticipantOverviewButton.classList.add('active');
+                        unifiedParticipantContainer.classList.remove('hidden'); // Show the unified list
+                        renderParticipantList(); // Render to the unified list
+                    } else if (sectionId === 'program-settings-section') {
+                        programSettingsSection.classList.remove('hidden');
+                        navProgramSettingsButton.classList.add('active');
+                    }
+                } else { // If sectionId is empty, no section is open
                     adminSectionWrapper.classList.add('hidden'); // Hide the wrapper
                     adminWelcomeMessage.classList.remove('hidden'); // Show welcome message
                 }
@@ -860,8 +862,12 @@
                                 adminContentScreen.classList.add('hidden');
                                 mainContentScreen.classList.remove('hidden');
                                 unifiedParticipantContainer.classList.remove('hidden'); // Show the unified list for Betreuer
+                                
+                                // Set the Betreuer's name in the welcome message
+                                betreuerNameDisplay.textContent = foundUser.username;
+
                                 renderParticipantList(); // Ensure it's rendered for Betreuer
-                                window.showMessage(`Willkommen, Betreuer ${foundUser.username}!`, false);
+                                // Removed window.showMessage here as the message is now static in HTML
                             }
                         } else {
                             window.showMessage('Falscher Code oder Benutzer nicht gefunden. Bitte versuche es erneut.');
@@ -1060,8 +1066,7 @@
                     const nameTextColorClass = (controlModeActive && !participantData.paid) ? 'text-red-500' : '';
 
                     // NEW: Comment indicator HTML
-                    const commentIconHTML = (participantData.comments && participantData.comments.length > 0) ?
-                        `<span class="comment-icon">&#x24B8;</span>` : ''; // Unicode encircled K
+                    const commentIndicator = (participantData.comments && participantData.comments.length > 0) ? '(C) ' : '';
 
 
                     listItem.innerHTML = `
@@ -1074,7 +1079,7 @@
                             <span class="w-3 h-3 rounded-full ${dotColorClass} mr-2 flex-shrink-0"></span>
                             <span class="font-semibold flex-grow ${nameTextColorClass}">${participantData.name}</span>
                             <span class="text-gray-500 text-xs block ml-2 flex-shrink-0">${participantData.registrationType} | Alleine: ${canGoHomeAloneText}</span>
-                            ${commentIconHTML} <!-- Insert comment icon -->
+                            ${commentIndicator ? `<span class="comment-icon" title="Kommentare vorhanden">&#x24B8;</span>` : ''} <!-- Render icon only if comments exist -->
                             <span class="info-icon" data-id="${participantData.id}">&#x2139;</span>
                         </div>
                     `;
