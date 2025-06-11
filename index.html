@@ -292,7 +292,7 @@
                         <input type="file" id="import-participants-file-input" accept=".xlsx,.xls" class="w-full p-2 mb-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <button id="import-participants-button" class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-4 rounded-lg w-full transition-all duration-200">Excel importieren</button>
                         <div id="import-participants-message" class="mt-2 text-sm text-center hidden"></div>
-                        <p class="text-xs text-gray-500 mt-2">Erwartetes Excel-Format (erste Zeile als Überschrift): Name,Vorname,Straße,Ort,Tel.,Darf alleine nach Hause?,Bezahlt?. Beispiel: Mustermann,Max,Musterstr. 1,Musterstadt,0123456789,Nein,Ja</p>
+                        <p class="text-xs text-gray-500 mt-2">Erwartetes Excel-Format (erste Zeile als Überschrift): Name,Vorname,Straße,Ort,Tel.,Darf alleine nach Hause?,Bezahlt?,**Anmeldeart** (optional: Tagesanmeldung/Wochenanmeldung). Beispiel: Mustermann,Max,Musterstr. 1,Musterstadt,0123456789,Nein,Ja,Tagesanmeldung</p>
                     </div>
                 </div>
 
@@ -1561,27 +1561,35 @@
                         }
 
                         const header = jsonRows[0].map(h => h.trim());
-                        // Define expected headers for mapping
-                        const expectedHeader = ['Name', 'Vorname', 'Straße', 'Ort', 'Tel.', 'Darf alleine nach Hause?', 'Bezahlt?'];
+                        // Define expected headers for mapping (updated to include Anmeldeart)
+                        const expectedHeader = ['Name', 'Vorname', 'Straße', 'Ort', 'Tel.', 'Darf alleine nach Hause?', 'Bezahlt?', 'Anmeldeart'];
                         
-                        // Validate headers
-                        const hasAllHeaders = expectedHeader.every(h => header.includes(h));
-                        if (!hasAllHeaders) {
-                            showAdminMessage(importParticipantsMessage, `Ungültiges Excel-Header-Format. Erwartet: ${expectedHeader.join(',')}`, true);
+                        // Validate headers - now stricter, requires all specified headers
+                        const hasAllRequiredHeaders = ['Name', 'Vorname', 'Straße', 'Ort', 'Tel.', 'Darf alleine nach Hause?', 'Bezahlt?'].every(h => header.includes(h));
+                        if (!hasAllRequiredHeaders) {
+                            showAdminMessage(importParticipantsMessage, `Ungültiges Excel-Header-Format. Erwartete Pflichtfelder: Name,Vorname,Straße,Ort,Tel.,Darf alleine nach Hause?,Bezahlt?`, true);
                             return;
                         }
+
+                        const regTypeColumnIndex = header.indexOf('Anmeldeart');
+                        const hasRegTypeColumn = regTypeColumnIndex !== -1;
 
                         let importedCount = 0;
                         for (let i = 1; i < jsonRows.length; i++) {
                             const values = jsonRows[i];
-                            if (values.length >= expectedHeader.length) { // Ensure enough columns exist
+                            if (values.length >= (expectedHeader.length - (hasRegTypeColumn ? 0 : 1))) { // Adjust required columns based on optional Anmeldeart
+                                const registrationType = hasRegTypeColumn && values[regTypeColumnIndex] && ['Tagesanmeldung', 'Wochenanmeldung'].includes(String(values[regTypeColumnIndex]).trim())
+                                    ? String(values[regTypeColumnIndex]).trim()
+                                    : 'Wochenanmeldung'; // Default to Wochenanmeldung if column missing or invalid value
+
+
                                 const newParticipant = {
                                     id: Date.now().toString() + '-' + i, // Unique ID for imported participants
                                     // Combine Vorname and Name (Nachname) from Excel
                                     name: `${values[header.indexOf('Vorname')]} ${values[header.indexOf('Name')]}`.trim(), 
                                     status: 'available',
                                     savedStatus: 'available',
-                                    registrationType: 'Wochenanmeldung', // Changed to Wochenanmeldung as requested
+                                    registrationType: registrationType, // Use determined registration type
                                     street: values[header.indexOf('Straße')] || '',
                                     city: values[header.indexOf('Ort')] || '',
                                     phone: values[header.indexOf('Tel.')] ? String(values[header.indexOf('Tel.')]).trim() : '', // Ensure phone is string
